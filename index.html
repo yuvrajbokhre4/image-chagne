@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Sequence</title>
+    <style>
+        #imageContainer {
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        #imageContainer img {
+            width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <div id="imageContainer">
+        <img src="./integra-magna-landing-sequence/001.webp" alt="Image 1">
+    </div>
+
+    <script>
+        let currentImageIndex = 1;
+        const maxImages = 30;
+        const imageContainer = document.getElementById('imageContainer');
+        let xDown = null;
+        let timeDown = null;
+
+        imageContainer.addEventListener('touchstart', handleTouchStart, false);
+        imageContainer.addEventListener('touchmove', handleTouchMove, false);
+        imageContainer.addEventListener('touchend', handleTouchEnd, false);
+
+        function handleTouchStart(event) {
+            const firstTouch = event.touches[0];
+            xDown = firstTouch.clientX;
+            timeDown = Date.now();
+        }
+
+        function handleTouchMove(event) {
+            if (!xDown) {
+                return;
+            }
+
+            const xUp = event.touches[0].clientX;
+            const xDiff = xDown - xUp;
+
+            if (Math.abs(xDiff) > 10) { // Adjust this threshold as needed
+                if (xDiff > 0) {
+                    // Swiped left
+                    if (currentImageIndex < maxImages) {
+                        currentImageIndex++;
+                    } else {
+                        currentImageIndex = 1; // Loop back to the first frame
+                    }
+                    updateImage();
+                } else {
+                    // Swiped right
+                    if (currentImageIndex > 1) {
+                        currentImageIndex--;
+                    } else {
+                        currentImageIndex = maxImages; // Loop to the last frame
+                    }
+                    updateImage();
+                }
+                // Reset touch start position
+                xDown = null;
+            }
+        }
+
+        function handleTouchEnd(event) {
+            if (xDown && timeDown) {
+                const timeElapsed = Date.now() - timeDown;
+                const xUp = event.changedTouches[0].clientX;
+                const xDiff = xDown - xUp;
+                const velocity = Math.abs(xDiff / timeElapsed); // Calculate velocity
+                console.log("Velocity:", velocity);
+            }
+            xDown = null;
+            timeDown = null;
+        }
+
+        function updateImage() {
+            const imageURL = `./integra-magna-landing-sequence/00${currentImageIndex}.webp`;
+            const newImg = new Image();
+            newImg.src = imageURL;
+            newImg.alt = `Image ${currentImageIndex}`;
+            newImg.onload = function () {
+                // Replace the current image with the new one
+                imageContainer.innerHTML = '';
+                imageContainer.appendChild(newImg);
+            };
+            console.log(imageURL);
+        }
+
+    </script>
+</body>
+</html>
